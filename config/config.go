@@ -26,57 +26,62 @@ var ShortDomainHost string
 // Setup loads the environment settings
 func Setup() {
 
-	setVariable(&ShortDomainHost, "SHORT_DOMAIN_HOST", nil)
+	setString(&ShortDomainHost, "SHORT_DOMAIN_HOST", nil)
+	var t string
+	//tt := "oi"
+	setString(&t, "OI", nil)
+	fmt.Printf("%s\n", t)
 }
 
-func setVariable(varName interface{}, envName string, def interface{}) {
+func exitIfNoDefault(envName string, shouldExit bool) {
+	if shouldExit {
+		fmt.Printf("Undefined required variable: %s\n", envName)
+		os.Exit(1)
+	}
+}
 
-	// TODO check for valid
+func setString(varName *string, envName string, def *string) {
+
+	// TODO Make validator param (regex)
 
 	if envValue, present := os.LookupEnv(envName); present {
+		*varName = envValue
 
-		switch p := varName.(type) {
-
-		case *string:
-			*p = envValue
-
-		case *bool:
-			env, err := strconv.ParseBool(strings.ToLower(envValue))
-			if err != nil {
-				fmt.Printf("Env variable %s should be true or false, but is %s\n", envName, envValue)
-				os.Exit(1)
-			}
-			*p = env
-
-		case *int:
-			env, err := strconv.Atoi(envValue)
-			if err != nil {
-				fmt.Printf("Env variable %s should be a number, but is %s\n", envName, envValue)
-				os.Exit(1)
-			}
-			*p = env
-		default:
-			fmt.Printf("Unimplemented Variable Type for configuration: %T\n", envName)
-			os.Exit(1)
-		}
 	} else {
+		exitIfNoDefault(envName, def == nil)
+		fmt.Println("before set")
+		*varName = *def
+		fmt.Println("after set")
+	}
+}
 
-		if def == nil {
-			fmt.Printf("Undefined required variable: %s", envName)
+func setBool(varName *bool, envName string, def *bool) {
+	if envValue, present := os.LookupEnv(envName); present {
+		env, err := strconv.ParseBool(strings.ToLower(envValue))
+		if err != nil {
+			fmt.Printf("Env variable %s should be true or false, but is %s\n", envName, envValue)
 			os.Exit(1)
 		}
+		*varName = env
 
-		switch p := varName.(type) {
-		case *string:
-			*p = *def.(*string)
-		case *bool:
-			*p = *def.(*bool)
-		case *int:
-			*p = *def.(*int)
-		default:
-			fmt.Printf("Unimplemented Variable Type for configuration (default): %T\n", envName)
+	} else {
+		exitIfNoDefault(envName, def == nil)
+		*varName = *def
+	}
+}
+
+func setInt(varName *int, envName string, def *int) {
+	if envValue, present := os.LookupEnv(envName); present {
+		env, err := strconv.Atoi(envValue)
+		if err != nil {
+			fmt.Printf("Env variable %s should be a number, but is %s\n", envName, envValue)
 			os.Exit(1)
 		}
+		*varName = env
+
+	} else {
+		exitIfNoDefault(envName, def == nil)
+		*varName = *def
 	}
 }
 
