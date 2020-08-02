@@ -23,6 +23,7 @@ func AuthorizeAPIKey(key string) error {
 		true,
 		now).First(&apiKey).Error; err != nil {
 
+		return errors.New("Unauthorized key")
 	}
 
 	return nil

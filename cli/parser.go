@@ -74,7 +74,8 @@ func ParseArguments() {
 		fmt.Println("Not Implemented")
 
 	case "short-url:generate":
-		fmt.Println("Not Implemented")
+		meta := parseShortURLMeta(os.Args[2:])
+		shortURLGenerate(meta)
 
 	default:
 		fmt.Println("No command or unexpected command found, exiting")

@@ -9,6 +9,8 @@ import (
 
 func apiKeyGenerate(expirationTime string) {
 
+	//TODO update to use utils.ParseDateString
+
 	var expTime *time.Time
 
 	if len(expirationTime) > 0 {
