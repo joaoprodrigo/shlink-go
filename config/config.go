@@ -23,35 +23,35 @@ If mandatory variables are not defined, prints an error and exits
 // ShortDomainHost is the custom short domain used for this shlink instance. For example doma.in. (Env SHORT_DOMAIN_HOST)
 var ShortDomainHost string
 
+// ShortDomainSchema is either http or https. (Env SHORT_DOMAIN_SCHEMA)
+var ShortDomainSchema string = "https"
+
 // Setup loads the environment settings
 func Setup() {
 
-	setString(&ShortDomainHost, "SHORT_DOMAIN_HOST", nil)
+	setString(&ShortDomainHost, "SHORT_DOMAIN_HOST", false)
+	setString(&ShortDomainSchema, "SHORT_DOMAIN_SCHEMA", true)
 }
 
-func exitIfNoDefault(envName string, shouldExit bool) {
-	if shouldExit {
+func exitIfNoDefault(envName string, hasDefault bool) {
+	if !hasDefault {
 		fmt.Printf("Undefined required variable: %s\n", envName)
 		os.Exit(1)
 	}
 }
 
-func setString(varName *string, envName string, def *string) {
+func setString(varName *string, envName string, hasDefault bool) {
 
 	// TODO Make validator param (regex)
 
 	if envValue, present := os.LookupEnv(envName); present {
 		*varName = envValue
-
 	} else {
-		exitIfNoDefault(envName, def == nil)
-		fmt.Println("before set")
-		*varName = *def
-		fmt.Println("after set")
+		exitIfNoDefault(envName, hasDefault)
 	}
 }
 
-func setBool(varName *bool, envName string, def *bool) {
+func setBool(varName *bool, envName string, hasDefault bool) {
 	if envValue, present := os.LookupEnv(envName); present {
 		env, err := strconv.ParseBool(strings.ToLower(envValue))
 		if err != nil {
@@ -61,12 +61,11 @@ func setBool(varName *bool, envName string, def *bool) {
 		*varName = env
 
 	} else {
-		exitIfNoDefault(envName, def == nil)
-		*varName = *def
+		exitIfNoDefault(envName, hasDefault)
 	}
 }
 
-func setInt(varName *int, envName string, def *int) {
+func setInt(varName *int, envName string, hasDefault bool) {
 	if envValue, present := os.LookupEnv(envName); present {
 		env, err := strconv.Atoi(envValue)
 		if err != nil {
@@ -76,15 +75,14 @@ func setInt(varName *int, envName string, def *int) {
 		*varName = env
 
 	} else {
-		exitIfNoDefault(envName, def == nil)
-		*varName = *def
+		exitIfNoDefault(envName, hasDefault)
 	}
 }
 
 /*
 unimplemented:
 
-SHORT_DOMAIN_SCHEMA: Either http or https.
+
 DB_DRIVER: sqlite (which is the default value), mysql, maria, postgres or mssql.
 DB_NAME: The database name to be used when using an external database driver. Defaults to shlink.
 DB_USER: The username credential to be used when using an external database driver.
