@@ -26,6 +26,9 @@ var ShortDomainHost string
 // ShortDomainSchema is either http or https. (Env SHORT_DOMAIN_SCHEMA)
 var ShortDomainSchema string = "https"
 
+// BasePath is The base path from which you plan to serve shlink, in case you don't want to serve it from the root of the domain. Defaults to ''. (Env BASE_PATH)
+var BasePath string = ""
+
 // Setup loads the environment settings
 func Setup() {
 
@@ -96,7 +99,6 @@ DB_PORT: The port in which the database service is running when using an externa
 DISABLE_TRACK_PARAM: The name of a query param that can be used to visit short URLs avoiding the visit to be tracked. This feature won't be available if not value is provided.
 DELETE_SHORT_URL_THRESHOLD: The amount of visits on short URLs which will not allow them to be deleted. Defaults to 15.
 VALIDATE_URLS: Boolean which tells if shlink should validate a status 20x is returned (after following redirects) when trying to shorten a URL. Defaults to false.
-BASE_PATH (v1.19.0) : The base path from which you plan to serve shlink, in case you don't want to serve it from the root of the domain. Defaults to ''.
 INVALID_SHORT_URL_REDIRECT_TO (v1.20.0) : If a URL is provided here, when a user tries to access an invalid short URL, he/she will be redirected to this value. If this env var is not provided, the user will see a generic 404 - not found page.
 REGULAR_404_REDIRECT_TO (v1.20.0) : If a URL is provided here, when a user tries to access a URL not matching any one supported by the router, he/she will be redirected to this value. If this env var is not provided, the user will see a generic 404 - not found page.
 BASE_URL_REDIRECT_TO (v1.20.0) : If a URL is provided here, when a user tries to access Shlink's base URL, he/she will be redirected to this value. If this env var is not provided, the user will see a generic 404 - not found page.
