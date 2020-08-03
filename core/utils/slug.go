@@ -1,8 +1,6 @@
 package utils
 
 import (
-	"errors"
-
 	gonanoid "github.com/matoous/go-nanoid"
 )
 
@@ -14,11 +12,7 @@ func MakeSlug(length int) (string, error) {
 
 	slugLength := defaultSlugLength
 
-	if length < minSlugLength {
-		return "", errors.New("Length of slug is lower than the minimum required")
-	}
-
-	if length > 0 {
+	if length > 0 && length > minSlugLength {
 		slugLength = length
 	}
 
