@@ -29,6 +29,9 @@ var ShortDomainSchema string = "https"
 // BasePath is The base path from which you plan to serve shlink, in case you don't want to serve it from the root of the domain. Defaults to ''. (Env BASE_PATH)
 var BasePath string = ""
 
+// DefaultItemsPerPage is the number of items per page listing
+var DefaultItemsPerPage int = 10
+
 // Setup loads the environment settings
 func Setup() {
 
