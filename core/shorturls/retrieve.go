@@ -42,6 +42,50 @@ func GetValidShortURL(domain string, shortcode string) (models.ShortURL, error) 
 	return shortURL, err
 }
 
+//GetShortURLs retrieves a list of shortURLs
+func GetShortURLs(params models.URLSearchParams) (*[]models.ShortURL, error) {
+
+	var shortURLs []models.ShortURL
+	var err error
+	queryBuilder := models.DB.Model(&models.ShortURL{})
+
+	queryBuilder, err = queryFilterDate(queryBuilder, params.StartDate, params.EndDate)
+	if err != nil {
+		return nil, err
+	}
+
+	queryBuilder, err = queryByTerm(queryBuilder, params.SearchTerm)
+	if err != nil {
+		return nil, err
+	}
+
+	queryBuilder, err = queryPaginate(queryBuilder, params.Page)
+	if err != nil {
+		return nil, err
+	}
+
+	queryBuilder, err = queryOrderBy(queryBuilder, params.OrderBy)
+	if err != nil {
+		return nil, err
+	}
+
+	queryBuilder, err = queryByTags(queryBuilder, params.Tags)
+	if err != nil {
+		return nil, err
+	}
+
+	// Using Rows instead of Find because I need "Distinct" to filter duplication with Tags
+	rows, err := queryBuilder.Select("DISTINCT \"short_urls\".*").Rows()
+	defer rows.Close()
+	for rows.Next() {
+		var shortURL models.ShortURL
+		models.DB.ScanRows(rows, &shortURL)
+		shortURLs = append(shortURLs, shortURL)
+	}
+
+	return &shortURLs, err
+}
+
 // ShortURLParams is a struct with Domain and ShortCode to be used with ParseShortURL
 type ShortURLParams struct {
 	Domain    string
