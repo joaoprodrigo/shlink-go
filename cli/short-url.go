@@ -30,6 +30,48 @@ func shortURLGenerate(meta *models.ShortURLMeta) {
 	)
 }
 
+// shortURLParse is a CLI Command to return the long URL of a given short URL
+func shortURLParse(shortURL string) {
+
+	shortURLparams, err := shorturls.ParseShortURL(shortURL)
+	if err != nil {
+		fmt.Println("Error when parsing given short URL", err)
+		os.Exit(1)
+	}
+
+	anyURL, err := shorturls.GetShortURL(shortURLparams.Domain, shortURLparams.ShortCode)
+	if err != nil {
+		fmt.Println("No Matches for any URL(or DB error)")
+	} else {
+		fmt.Printf("Match for URL: %s\n", anyURL.OriginalURL)
+	}
+
+	validURL, err := shorturls.GetValidShortURL(shortURLparams.Domain, shortURLparams.ShortCode)
+	if err != nil {
+		fmt.Println("No Matches for a valid URL(or DB error)")
+	} else {
+		fmt.Printf("Match for currently valid URL: %s\n", validURL.OriginalURL)
+	}
+
+}
+
+// shortURLDelete is a CLI Command that deletes a given short URL from the DB
+func shortURLDelete(shortURL string) {
+
+	shortURLparams, err := shorturls.ParseShortURL(shortURL)
+	if err != nil {
+		fmt.Println("Error when parsing given short URL", err)
+		os.Exit(1)
+	}
+
+	err = shorturls.DeleteShortURL(shortURLparams.Domain, shortURLparams.ShortCode)
+	if err != nil {
+		fmt.Printf("Error when deleting: %s\n", err)
+	} else {
+		fmt.Println("Entry Removed")
+	}
+}
+
 // parseShortURLMeta uses flags to determine all the passed options
 // and generate a ShortURLMeta with them
 func parseShortURLMeta(osArgs []string) *models.ShortURLMeta {

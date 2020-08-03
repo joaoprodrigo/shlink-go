@@ -61,10 +61,7 @@ func ParseArguments() {
 		apiKeyGenerate(*apiGenerateExp)
 
 	case "api-key:disable":
-		if len(os.Args) != 3 {
-			fmt.Println("Disable requires API Key and no other arguments")
-			os.Exit(1)
-		}
+		checkExtraArgument("API Key")
 		apiKeyDisable(os.Args[2])
 
 	case "api-key:list":
@@ -73,12 +70,27 @@ func ParseArguments() {
 	case "short-url:list":
 		fmt.Println("Not Implemented")
 
+	case "short-url:delete":
+		checkExtraArgument("short URL")
+		shortURLDelete(os.Args[2])
+
 	case "short-url:generate":
 		meta := parseShortURLMeta(os.Args[2:])
 		shortURLGenerate(meta)
 
+	case "short-url:parse":
+		checkExtraArgument("short URL")
+		shortURLParse(os.Args[2])
+
 	default:
 		fmt.Println("No command or unexpected command found, exiting")
+		os.Exit(1)
+	}
+}
+
+func checkExtraArgument(argName string) {
+	if len(os.Args) != 3 {
+		fmt.Printf("%s requires %s argument and no other arguments", os.Args[1], argName)
 		os.Exit(1)
 	}
 }
