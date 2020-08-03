@@ -1,4 +1,4 @@
-package shorturls
+package utils
 
 import (
 	"errors"
