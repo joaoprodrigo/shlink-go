@@ -1,7 +1,6 @@
 package shorturls
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/joaoprodrigo/shlink-go/config"
@@ -10,7 +9,7 @@ import (
 )
 
 // CreateShortURL generates a new short url based on meta received
-func CreateShortURL(meta models.ShortURLMeta) (*models.ShortURL, error) {
+func CreateShortURL(meta *models.ShortURLMeta) (*models.ShortURL, error) {
 
 	// TODO Fix issue:
 	//     The model creation is updating the Tag Model even for tags that exist... eventually should be fixed
@@ -26,7 +25,6 @@ func CreateShortURL(meta models.ShortURLMeta) (*models.ShortURL, error) {
 		shortURL.ValidSince = validSince
 	} else {
 		now := time.Now()
-		fmt.Printf("time: %s\n", now)
 		shortURL.ValidSince = &now
 	}
 
@@ -40,6 +38,7 @@ func CreateShortURL(meta models.ShortURLMeta) (*models.ShortURL, error) {
 
 	// if domain is not set, use default
 	if meta.Domain == "" {
+		meta.Domain = config.ShortDomainHost
 		shortURL.SetDomain(config.ShortDomainHost)
 	} else {
 		shortURL.SetDomain(meta.Domain)
@@ -52,7 +51,7 @@ func CreateShortURL(meta models.ShortURLMeta) (*models.ShortURL, error) {
 	if meta.CustomSlug != "" {
 		shortURL.ShortCode = meta.CustomSlug
 	} else {
-		shortCode, err := makeSlug(int(meta.ShortCodeLength))
+		shortCode, err := utils.MakeSlug(int(meta.ShortCodeLength))
 		if err != nil {
 			return nil, err
 		}
