@@ -27,10 +27,6 @@ var ShortDomainHost string
 func Setup() {
 
 	setString(&ShortDomainHost, "SHORT_DOMAIN_HOST", nil)
-	var t string
-	//tt := "oi"
-	setString(&t, "OI", nil)
-	fmt.Printf("%s\n", t)
 }
 
 func exitIfNoDefault(envName string, shouldExit bool) {
