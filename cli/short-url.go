@@ -2,14 +2,32 @@ package cli
 
 import (
 	"flag"
+	"fmt"
+	"os"
 	"strings"
+
+	"github.com/joaoprodrigo/shlink-go/config"
+	"github.com/joaoprodrigo/shlink-go/core/shorturls"
 
 	"github.com/joaoprodrigo/shlink-go/core/models"
 )
 
 // shortURLGenerate is a CLI Command called to generate a short url based on some metadata
 func shortURLGenerate(meta *models.ShortURLMeta) {
+	shortURL, err := shorturls.CreateShortURL(meta)
 
+	if err != nil {
+		fmt.Printf("Error when generating Short URL: %s\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf(
+		"New ShortURL Created:\n"+
+			"	Original URL: %s\n"+
+			"	Short URL: %s://%s/%s\n",
+		shortURL.OriginalURL,
+		config.ShortDomainSchema, meta.Domain, shortURL.ShortCode,
+	)
 }
 
 // parseShortURLMeta uses flags to determine all the passed options
@@ -40,6 +58,11 @@ func parseShortURLMeta(osArgs []string) *models.ShortURLMeta {
 		FindIfExists:    *findIfExists,
 		Domain:          *domain,
 		ShortCodeLength: uint(*length),
+	}
+
+	if meta.LongURL == "" {
+		fmt.Println("Long URL (-long) is required")
+		os.Exit(1)
 	}
 
 	return &meta
