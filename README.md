@@ -1,4 +1,4 @@
-#WIP Shlink Go
+# WIP Shlink Go
 
 This is a work in progress in very early stages. It's subject to many changes and should not be used!
 
@@ -10,7 +10,7 @@ Right now it's meant to be a learning experience as I just started getting into 
 
 Current Roadmap:
 
-1. Basic CLI and Service
+1. Basic CLI and Service (ongoing, mostly done)
 2. Unit Testing
 3. REST API using Gin
 4. Implement visits functionality
