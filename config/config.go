@@ -20,6 +20,9 @@ Sets variables based on a priority list, from higher priority to lower:
 If mandatory variables are not defined, prints an error and exits
 */
 
+// DatabaseFile is the name of the file used when using sqlite3
+var DatabaseFile = "shlink.db"
+
 // ShortDomainHost is the custom short domain used for this shlink instance. For example doma.in. (Env SHORT_DOMAIN_HOST)
 var ShortDomainHost string
 
@@ -41,8 +44,7 @@ func Setup() {
 
 func exitIfNoDefault(envName string, hasDefault bool) {
 	if !hasDefault {
-		fmt.Printf("Undefined required variable: %s\n", envName)
-		os.Exit(1)
+		panic("Undefined required variable: " + envName)
 	}
 }
 

@@ -30,14 +30,14 @@ func AuthorizeAPIKey(key string) error {
 }
 
 // CreateAPIKey creates a new key in the db and returns the key
-func CreateAPIKey(expirationDate *time.Time) string {
+func CreateAPIKey(expirationDate *time.Time) (string, error) {
 	keyUUID := uuid.New().String()
 
 	key := models.APIKey{Key: keyUUID, ExpirationDate: expirationDate, Enabled: true}
 
 	models.DB.Create(&key)
 
-	return keyUUID
+	return keyUUID, nil
 }
 
 // DisableAPIKey disables a given keyID so it can no longer be used

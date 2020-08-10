@@ -26,7 +26,7 @@ func apiKeyGenerate(expirationTime string) {
 		expTime = &parsedTime
 	}
 
-	key := security.CreateAPIKey(expTime)
+	key, _ := security.CreateAPIKey(expTime)
 	fmt.Printf("Generated key %v\n", key)
 
 	return
