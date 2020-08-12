@@ -6,15 +6,13 @@ import (
 	"time"
 
 	"github.com/joaoprodrigo/shlink-go/core/models"
-
-	"github.com/joaoprodrigo/shlink-go/config"
 )
 
 // GetShortURL retrieves the ShortURL Model from the db even if it isn't valid
-func GetShortURL(domain string, shortcode string) (models.ShortURL, error) {
+func (s *ShortURLService) GetShortURL(domain string, shortcode string) (models.ShortURL, error) {
 	var shortURL models.ShortURL
 
-	err := models.DB.
+	err := s.DB.
 		Joins("JOIN domains ON domains.id = short_urls.domain_id").
 		Where("domains.authority = ? AND short_code = ?", domain, shortcode).
 		// Where("short_code = ?", shortcode).
@@ -25,12 +23,12 @@ func GetShortURL(domain string, shortcode string) (models.ShortURL, error) {
 }
 
 // GetValidShortURL retrieves the ShortURL Model from the db even if it isn't valid
-func GetValidShortURL(domain string, shortcode string) (models.ShortURL, error) {
+func (s *ShortURLService) GetValidShortURL(domain string, shortcode string) (models.ShortURL, error) {
 
 	var shortURL models.ShortURL
 	now := time.Now()
 
-	err := models.DB.
+	err := s.DB.
 		Joins("JOIN domains ON domains.id = short_urls.domain_id").
 		Where("domains.authority = ? AND short_code = ?", domain, shortcode).
 		Where("valid_since IS NULL OR valid_since <= ?", &now).
@@ -43,11 +41,11 @@ func GetValidShortURL(domain string, shortcode string) (models.ShortURL, error) 
 }
 
 //GetShortURLs retrieves a list of shortURLs
-func GetShortURLs(params models.URLSearchParams) (*[]models.ShortURL, error) {
+func (s *ShortURLService) GetShortURLs(params URLSearchParams) (*[]models.ShortURL, error) {
 
 	var shortURLs []models.ShortURL
 	var err error
-	queryBuilder := models.DB.Model(&models.ShortURL{})
+	queryBuilder := s.DB.Model(&models.ShortURL{})
 
 	queryBuilder, err = queryFilterDate(queryBuilder, params.StartDate, params.EndDate)
 	if err != nil {
@@ -59,7 +57,7 @@ func GetShortURLs(params models.URLSearchParams) (*[]models.ShortURL, error) {
 		return nil, err
 	}
 
-	queryBuilder, err = queryPaginate(queryBuilder, params.Page)
+	queryBuilder, err = queryPaginate(queryBuilder, params.Page, s.Config.DefaultItemsPerPage)
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +77,7 @@ func GetShortURLs(params models.URLSearchParams) (*[]models.ShortURL, error) {
 	defer rows.Close()
 	for rows.Next() {
 		var shortURL models.ShortURL
-		models.DB.ScanRows(rows, &shortURL)
+		s.DB.ScanRows(rows, &shortURL)
 		shortURLs = append(shortURLs, shortURL)
 	}
 
@@ -93,9 +91,9 @@ type ShortURLParams struct {
 }
 
 // ParseShortURL returns the domain and shortcode of a given URL
-func ParseShortURL(shortURL string) (ShortURLParams, error) {
+func (s *ShortURLService) ParseShortURL(shortURL string) (ShortURLParams, error) {
 
-	urlMatcher := `^(?:https?:\/\/)?([a-zA-Z0-9\.]*)\/?` + config.BasePath + `\/([a-zA-Z0-9]*)$`
+	urlMatcher := `^(?:https?:\/\/)?([a-zA-Z0-9\.]*)\/?` + s.Config.BasePath + `\/([a-zA-Z0-9]*)$`
 
 	re := regexp.MustCompile(urlMatcher)
 

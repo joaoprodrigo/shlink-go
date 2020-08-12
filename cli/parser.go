@@ -43,7 +43,7 @@ Available commands:
 */
 
 // ParseArguments gets OS Args and executes the required function
-func ParseArguments() {
+func (p BasicCliInterface) ParseArguments() {
 
 	if len(os.Args) < 2 {
 		// if no arguments, run the server
@@ -58,29 +58,29 @@ func ParseArguments() {
 	switch command {
 	case "api-key:generate":
 		apiGenerateCmd.Parse(os.Args[2:])
-		apiKeyGenerate(*apiGenerateExp)
+		p.apiKeyGenerate(*apiGenerateExp)
 
 	case "api-key:disable":
 		checkExtraArgument("API Key")
-		apiKeyDisable(os.Args[2])
+		p.apiKeyDisable(os.Args[2])
 
 	case "api-key:list":
-		apiKeyList()
+		p.apiKeyList()
 
 	case "short-url:list":
 		fmt.Println("Not Implemented")
 
 	case "short-url:delete":
 		checkExtraArgument("short URL")
-		shortURLDelete(os.Args[2])
+		p.shortURLDelete(os.Args[2])
 
 	case "short-url:generate":
-		meta := parseShortURLMeta(os.Args[2:])
-		shortURLGenerate(meta)
+		meta := p.parseShortURLMeta(os.Args[2:])
+		p.shortURLGenerate(meta)
 
 	case "short-url:parse":
 		checkExtraArgument("short URL")
-		shortURLParse(os.Args[2])
+		p.shortURLParse(os.Args[2])
 
 	default:
 		fmt.Println("No command or unexpected command found, exiting")

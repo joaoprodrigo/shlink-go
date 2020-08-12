@@ -3,11 +3,9 @@ package cli
 import (
 	"fmt"
 	"time"
-
-	"github.com/joaoprodrigo/shlink-go/core/security"
 )
 
-func apiKeyGenerate(expirationTime string) {
+func (p BasicCliInterface) apiKeyGenerate(expirationTime string) {
 
 	//TODO update to use utils.ParseDateString
 
@@ -26,14 +24,14 @@ func apiKeyGenerate(expirationTime string) {
 		expTime = &parsedTime
 	}
 
-	key, _ := security.CreateAPIKey(expTime)
+	key, _ := p.auth.CreateAPIKey(expTime)
 	fmt.Printf("Generated key %v\n", key)
 
 	return
 }
 
-func apiKeyDisable(apiKey string) {
-	if err := security.DisableAPIKey(apiKey); err != nil {
+func (p BasicCliInterface) apiKeyDisable(apiKey string) {
+	if err := p.auth.DisableAPIKey(apiKey); err != nil {
 		fmt.Printf("An error has occured: %s\n", err)
 		return
 	}
@@ -41,8 +39,8 @@ func apiKeyDisable(apiKey string) {
 	fmt.Printf("Disabled API Key %s\n", apiKey)
 }
 
-func apiKeyList() {
-	activeKeys := security.ListAPIKeys()
+func (p BasicCliInterface) apiKeyList() {
+	activeKeys := p.auth.ListAPIKeys()
 
 	if len(activeKeys) == 0 {
 		fmt.Println("No active keys present")

@@ -6,15 +6,12 @@ import (
 	"os"
 	"strings"
 
-	"github.com/joaoprodrigo/shlink-go/config"
 	"github.com/joaoprodrigo/shlink-go/core/shorturls"
-
-	"github.com/joaoprodrigo/shlink-go/core/models"
 )
 
 // shortURLGenerate is a CLI Command called to generate a short url based on some metadata
-func shortURLGenerate(meta *models.ShortURLMeta) {
-	shortURL, err := shorturls.CreateShortURL(meta)
+func (p BasicCliInterface) shortURLGenerate(meta *shorturls.ShortURLMeta) {
+	shortURL, err := p.shortURL.CreateShortURL(meta)
 
 	if err != nil {
 		fmt.Printf("Error when generating Short URL: %s\n", err)
@@ -26,27 +23,27 @@ func shortURLGenerate(meta *models.ShortURLMeta) {
 			"	Original URL: %s\n"+
 			"	Short URL: %s://%s/%s\n",
 		shortURL.OriginalURL,
-		config.ShortDomainSchema, meta.Domain, shortURL.ShortCode,
+		p.config.ShortDomainSchema, meta.Domain, shortURL.ShortCode,
 	)
 }
 
 // shortURLParse is a CLI Command to return the long URL of a given short URL
-func shortURLParse(shortURL string) {
+func (p BasicCliInterface) shortURLParse(shortURL string) {
 
-	shortURLparams, err := shorturls.ParseShortURL(shortURL)
+	shortURLparams, err := p.shortURL.ParseShortURL(shortURL)
 	if err != nil {
 		fmt.Println("Error when parsing given short URL", err)
 		os.Exit(1)
 	}
 
-	anyURL, err := shorturls.GetShortURL(shortURLparams.Domain, shortURLparams.ShortCode)
+	anyURL, err := p.shortURL.GetShortURL(shortURLparams.Domain, shortURLparams.ShortCode)
 	if err != nil {
 		fmt.Println("No Matches for any URL(or DB error)")
 	} else {
 		fmt.Printf("Match for URL: %s\n", anyURL.OriginalURL)
 	}
 
-	validURL, err := shorturls.GetValidShortURL(shortURLparams.Domain, shortURLparams.ShortCode)
+	validURL, err := p.shortURL.GetValidShortURL(shortURLparams.Domain, shortURLparams.ShortCode)
 	if err != nil {
 		fmt.Println("No Matches for a valid URL(or DB error)")
 	} else {
@@ -56,15 +53,15 @@ func shortURLParse(shortURL string) {
 }
 
 // shortURLDelete is a CLI Command that deletes a given short URL from the DB
-func shortURLDelete(shortURL string) {
+func (p BasicCliInterface) shortURLDelete(shortURL string) {
 
-	shortURLparams, err := shorturls.ParseShortURL(shortURL)
+	shortURLparams, err := p.shortURL.ParseShortURL(shortURL)
 	if err != nil {
 		fmt.Println("Error when parsing given short URL", err)
 		os.Exit(1)
 	}
 
-	err = shorturls.DeleteShortURL(shortURLparams.Domain, shortURLparams.ShortCode)
+	err = p.shortURL.DeleteShortURL(shortURLparams.Domain, shortURLparams.ShortCode)
 	if err != nil {
 		fmt.Printf("Error when deleting: %s\n", err)
 	} else {
@@ -74,7 +71,7 @@ func shortURLDelete(shortURL string) {
 
 // parseShortURLMeta uses flags to determine all the passed options
 // and generate a ShortURLMeta with them
-func parseShortURLMeta(osArgs []string) *models.ShortURLMeta {
+func (p BasicCliInterface) parseShortURLMeta(osArgs []string) *shorturls.ShortURLMeta {
 
 	metaFlags := flag.NewFlagSet("meta", flag.ExitOnError)
 
@@ -90,7 +87,7 @@ func parseShortURLMeta(osArgs []string) *models.ShortURLMeta {
 
 	metaFlags.Parse(osArgs)
 
-	meta := models.ShortURLMeta{
+	meta := shorturls.ShortURLMeta{
 		LongURL:         *longURL,
 		Tags:            tagsFromString(*tags),
 		ValidSince:      *validSince,

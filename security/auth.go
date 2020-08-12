@@ -4,20 +4,34 @@ import (
 	"errors"
 	"time"
 
+	"github.com/jinzhu/gorm"
+	"github.com/joaoprodrigo/shlink-go/config"
+
 	"github.com/joaoprodrigo/shlink-go/core/models"
 
 	"github.com/google/uuid"
 )
 
+// AuthService is an Authorization Service for storing, retrieving and verifying authorization keys
+type AuthService struct {
+	Config *config.ConfigurationRepo
+	DB     *gorm.DB
+}
+
+// NewAuthService returns a new initialized Authorization Service
+func NewAuthService(config *config.ConfigurationRepo, db *gorm.DB) *AuthService {
+	return &AuthService{Config: config, DB: db}
+}
+
 // AuthorizeAPIKey returns an error if key is disabled, doesnt exist or is expired
-func AuthorizeAPIKey(key string) error {
+func (s *AuthService) AuthorizeAPIKey(key string) error {
 
 	//TODO Test
 
 	var apiKey models.APIKey
 	now := time.Now()
 
-	if err := models.DB.Where(
+	if err := s.DB.Where(
 		"key = ? AND enabled = ? AND (expiration_date is null OR expiration_date >= ?)",
 		key,
 		true,
@@ -30,35 +44,35 @@ func AuthorizeAPIKey(key string) error {
 }
 
 // CreateAPIKey creates a new key in the db and returns the key
-func CreateAPIKey(expirationDate *time.Time) (string, error) {
+func (s *AuthService) CreateAPIKey(expirationDate *time.Time) (string, error) {
 	keyUUID := uuid.New().String()
 
 	key := models.APIKey{Key: keyUUID, ExpirationDate: expirationDate, Enabled: true}
 
-	models.DB.Create(&key)
+	s.DB.Create(&key)
 
 	return keyUUID, nil
 }
 
 // DisableAPIKey disables a given keyID so it can no longer be used
-func DisableAPIKey(keyID string) error {
-	key, err := getAPIKey(keyID)
+func (s *AuthService) DisableAPIKey(keyID string) error {
+	key, err := s.getAPIKey(keyID)
 
 	if err != nil {
 		return errors.New("API Key not found")
 	}
 
-	models.DB.Model(&key).Update("enabled", false)
+	s.DB.Model(&key).Update("enabled", false)
 
 	return nil
 }
 
 // ListAPIKeys returns a list of currently enabled API Keys
-func ListAPIKeys() []string {
+func (s *AuthService) ListAPIKeys() []string {
 	var keys []models.APIKey
 	var stringKeys []string = []string{}
 
-	models.DB.Where("enabled = ? AND (expiration_date is null OR expiration_date >= ?)", true, time.Now()).Find(&keys)
+	s.DB.Where("enabled = ? AND (expiration_date is null OR expiration_date >= ?)", true, time.Now()).Find(&keys)
 
 	for _, v := range keys {
 		stringKeys = append(stringKeys, v.Key)
@@ -67,10 +81,10 @@ func ListAPIKeys() []string {
 	return stringKeys
 }
 
-func getAPIKey(keyID string) (*models.APIKey, error) {
+func (s *AuthService) getAPIKey(keyID string) (*models.APIKey, error) {
 	var key models.APIKey
 
-	if err := models.DB.Where("key = ?", keyID).First(&key).Error; err != nil {
+	if err := s.DB.Where("key = ?", keyID).First(&key).Error; err != nil {
 		return nil, err
 	}
 

@@ -20,26 +20,28 @@ Sets variables based on a priority list, from higher priority to lower:
 If mandatory variables are not defined, prints an error and exits
 */
 
-// DatabaseFile is the name of the file used when using sqlite3
-var DatabaseFile = "shlink.db"
+// ConfigurationRepo is a struct holding the default values of the app.
+// It can be initialized with NewConfigurationRepo() with the default values.
+type ConfigurationRepo struct {
+	DatabaseFile        string // DatabaseFile is the name of the file used when using sqlite3
+	ShortDomainHost     string // ShortDomainHost is the custom short domain used for this shlink instance. For example doma.in. (Env SHORT_DOMAIN_HOST)
+	ShortDomainSchema   string // ShortDomainSchema is either http or https. (Env SHORT_DOMAIN_SCHEMA)
+	BasePath            string // BasePath is The base path from which you plan to serve shlink, in case you don't want to serve it from the root of the domain. Defaults to ''. (Env BASE_PATH)
+	DefaultItemsPerPage int    // DefaultItemsPerPage is the number of items per page listing
+}
 
-// ShortDomainHost is the custom short domain used for this shlink instance. For example doma.in. (Env SHORT_DOMAIN_HOST)
-var ShortDomainHost string
+// NewConfigurationRepo creates a new Repo, retrieving the Environment Vars and adding default values where apropriate
+func NewConfigurationRepo() *ConfigurationRepo {
+	repo := ConfigurationRepo{
+		DatabaseFile:        "shlink.db",
+		BasePath:            "",
+		ShortDomainSchema:   "https",
+		DefaultItemsPerPage: 10,
+	}
 
-// ShortDomainSchema is either http or https. (Env SHORT_DOMAIN_SCHEMA)
-var ShortDomainSchema string = "https"
-
-// BasePath is The base path from which you plan to serve shlink, in case you don't want to serve it from the root of the domain. Defaults to ''. (Env BASE_PATH)
-var BasePath string = ""
-
-// DefaultItemsPerPage is the number of items per page listing
-var DefaultItemsPerPage int = 10
-
-// Setup loads the environment settings
-func Setup() {
-
-	setString(&ShortDomainHost, "SHORT_DOMAIN_HOST", false)
-	setString(&ShortDomainSchema, "SHORT_DOMAIN_SCHEMA", true)
+	setString(&repo.ShortDomainHost, "SHORT_DOMAIN_HOST", false)
+	setString(&repo.ShortDomainSchema, "SHORT_DOMAIN_SCHEMA", true)
+	return &repo
 }
 
 func exitIfNoDefault(envName string, hasDefault bool) {

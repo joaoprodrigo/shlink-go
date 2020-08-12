@@ -3,14 +3,18 @@ package main
 import (
 	"github.com/joaoprodrigo/shlink-go/cli"
 	"github.com/joaoprodrigo/shlink-go/config"
-	"github.com/joaoprodrigo/shlink-go/core/models"
+	"github.com/joaoprodrigo/shlink-go/core/database"
+	"github.com/joaoprodrigo/shlink-go/core/security"
+	"github.com/joaoprodrigo/shlink-go/core/shorturls"
 )
 
 func main() {
 
-	config.Setup()
+	configRepo := config.NewConfigurationRepo()
+	db := database.NewGormDB(configRepo, true)
+	auth := security.NewAuthService(configRepo, db)
+	shortURLService := shorturls.NewService(configRepo, db)
 
-	models.StartupDB()
-
-	cli.ParseArguments()
+	cliParser := cli.NewCliInterface(shortURLService, auth, configRepo)
+	cliParser.ParseArguments()
 }

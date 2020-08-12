@@ -1,4 +1,4 @@
-package models
+package shorturls
 
 // URLSearchParams is a struct for passing params to search for a shortURL
 type URLSearchParams struct {

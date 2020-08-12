@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/jinzhu/gorm"
-	"github.com/joaoprodrigo/shlink-go/config"
 	"github.com/joaoprodrigo/shlink-go/core/utils"
 )
 
@@ -70,17 +69,17 @@ func queryByTerm(db *gorm.DB, searchTerm string) (*gorm.DB, error) {
 	return db, nil
 }
 
-func queryPaginate(db *gorm.DB, pageNumber int) (*gorm.DB, error) {
+func queryPaginate(db *gorm.DB, pageNumber int, itemsPerPage int) (*gorm.DB, error) {
 
 	// page integer (query) The page to be displayed. Defaults to 1
 	page := 1
 	offset := 0
 	if pageNumber > 0 {
 		page = pageNumber
-		offset = (page - 1) * config.DefaultItemsPerPage
+		offset = (page - 1) * itemsPerPage
 		db = db.Offset(offset)
 	}
-	db = db.Limit(config.DefaultItemsPerPage)
+	db = db.Limit(itemsPerPage)
 
 	return db, nil
 }

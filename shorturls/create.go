@@ -3,13 +3,12 @@ package shorturls
 import (
 	"time"
 
-	"github.com/joaoprodrigo/shlink-go/config"
 	"github.com/joaoprodrigo/shlink-go/core/models"
 	"github.com/joaoprodrigo/shlink-go/core/utils"
 )
 
 // CreateShortURL generates a new short url based on meta received
-func CreateShortURL(meta *models.ShortURLMeta) (*models.ShortURL, error) {
+func (s *ShortURLService) CreateShortURL(meta *ShortURLMeta) (*models.ShortURL, error) {
 
 	// TODO Fix issue:
 	//     The model creation is updating the Tag Model even for tags that exist... eventually should be fixed
@@ -38,10 +37,10 @@ func CreateShortURL(meta *models.ShortURLMeta) (*models.ShortURL, error) {
 
 	// if domain is not set, use default
 	if meta.Domain == "" {
-		meta.Domain = config.ShortDomainHost
-		shortURL.SetDomain(config.ShortDomainHost)
+		meta.Domain = s.Config.ShortDomainHost
+		s.SetDomain(&shortURL, s.Config.ShortDomainHost)
 	} else {
-		shortURL.SetDomain(meta.Domain)
+		s.SetDomain(&shortURL, meta.Domain)
 	}
 
 	// check original url?
@@ -63,11 +62,49 @@ func CreateShortURL(meta *models.ShortURLMeta) (*models.ShortURL, error) {
 	shortURL.MaxVisits = meta.MaxVisits
 
 	// tags
-	err := shortURL.AssignTags(meta.Tags)
+	err := s.AssignTags(&shortURL, meta.Tags)
 	if err != nil {
 		return nil, err
 	}
 
-	models.DB.Debug().Create(&shortURL)
+	s.DB.Create(&shortURL)
 	return &shortURL, nil //edit
+}
+
+// SetDomain sets DomainId in ShortURL, creating that ID if necessary
+func (s *ShortURLService) SetDomain(shortURL *models.ShortURL, domainAuthority string) error {
+	var domain models.Domain
+
+	s.DB.Where(models.Domain{Authority: domainAuthority}).FirstOrCreate(&domain)
+
+	shortURL.DomainID = domain.ID
+
+	return nil
+}
+
+// AssignTags Creates the Tags that don't exist and assigns them to the ShortURL
+func (s *ShortURLService) AssignTags(shortURL *models.ShortURL, tagNames []string) error {
+	var tags []models.Tag
+
+	// Load Tags that already exist
+	s.DB.Where("Name in (?)", tagNames).Find(&tags)
+
+	// Create the ones that don't
+
+newTagLoop:
+	// Loop the Found Tags for each new tag looking for it
+	for _, newTag := range tagNames {
+		for _, oldTag := range tags {
+
+			// If we find it, continue the outer loop so we dont append it
+			if oldTag.Name == newTag {
+				continue newTagLoop
+			}
+		}
+		tags = append(tags, models.Tag{Name: newTag})
+	}
+
+	shortURL.Tags = tags
+
+	return nil
 }
